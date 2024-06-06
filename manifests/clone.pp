@@ -20,6 +20,7 @@
 #   clone will use as its base image.
 define clone_army::clone (
   Type[Clone_Army::Base_image] $base,
+  Optional[String] $runinterval = undef,
 ) {
   include clone_army::service
 
@@ -39,6 +40,18 @@ define clone_army::clone (
     content => @("EOF"/L),
       ${title}.${facts['networking']['ip']}
       | EOF
+  }
+
+  $_runinterval_ensure = ($runinterval =~ NotUndef) ? {
+    true    => 'present',
+    default => 'absent',
+  }
+  pe_ini_setting { "${title} puppet.conf runinterval":
+    ensure  => $_runinterval_ensure,
+    path    => "${_upperdir}/etc/puppetlabs/puppet/puppet.conf",
+    section => 'agent',
+    setting => 'runinterval',
+    value   => $runinterval,
   }
 
   file { "/etc/systemd/system/var-lib-machines-${title}.mount":
@@ -65,7 +78,7 @@ define clone_army::clone (
                 Exec['clone_army systemctl reload']],
   }
 
-  service {"puppet-clone-army@${title}":
+  service { "puppet-clone-army@${title}":
     enable  => true,
     require => [Service["var-lib-machines-${title}.mount"],
                 Exec['clone_army systemctl reload']],

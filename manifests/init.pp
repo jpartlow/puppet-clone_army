@@ -13,6 +13,7 @@
 class clone_army (
   String $master = pick($server_facts['servername'], 'puppet'),
   Optional[Integer] $num_clones = undef,
+  Optional[String] $runinterval = undef,
 ) {
   contain clone_army::service
 
@@ -48,13 +49,14 @@ class clone_army (
   }
 
   # TODO: Extend to match the OS of the master where possible.
-  Clone_army::Base_image {$platform:
+  Clone_army::Base_image { $platform:
     master => $master
   }
 
   Integer[1, $_num_clones].each |$i| {
-    Clone_army::Clone {"clone${i}":
+    Clone_army::Clone { "clone${i}":
       base    => Clone_army::Base_image[$platform],
+      runinterval => $runinterval,
       require => [Clone_army::Base_image[$platform]],
     }
   }
