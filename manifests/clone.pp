@@ -37,7 +37,7 @@ define clone_army::clone (
   file { "${_upperdir}/etc/hostname":
     ensure  => file,
     content => @("EOF"/L),
-      ${title}.${trusted['certname']}
+      ${title}.${facts['networking']['ip']}
       | EOF
   }
 
