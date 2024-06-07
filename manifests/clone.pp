@@ -53,6 +53,13 @@ define clone_army::clone (
     setting => 'runinterval',
     value   => $runinterval,
   }
+  pe_ini_setting { "${title} puppet.conf splay":
+    ensure  => $_runinterval_ensure,
+    path    => "${_upperdir}/etc/puppetlabs/puppet/puppet.conf",
+    section => 'agent',
+    setting => 'splay',
+    value   => true,
+  }
 
   file { "/etc/systemd/system/var-lib-machines-${title}.mount":
     content => @("EOF"/L),
